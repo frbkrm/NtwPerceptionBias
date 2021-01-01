@@ -101,23 +101,28 @@ def homophilic_barabasi_albert_graph(N, m , minority_fraction, similitude):
 
 def _pick_targets(G,source,target_list,dist,m):
     
-    target_prob_dict = {}
-    for target in target_list:
-        target_prob = (1-dist[(source,target)])* (G.degree(target)+0.00001)
-        target_prob_dict[target] = target_prob
+    def _make_prob_dict():
+        target_prob_dict = {}
+        for target in target_list:
+            target_prob = (1-dist[(source,target)])* (G.degree(target)+0.00001)
+            target_prob_dict[target] = target_prob
+        return target_prob_dict
         
-    prob_sum = sum(target_prob_dict.values())
+    
 
     targets = set()
     target_list_copy = copy.copy(target_list)
     count_looking = 0
-    if prob_sum == 0:
-        return targets #it returns an empty set
 
     while len(targets) < m:
         count_looking += 1
         if count_looking > len(G): # if node fails to find target
             break
+        target_prob_dict = _make_prob_dict()
+        prob_sum = sum(target_prob_dict.values())
+        if prob_sum == 0:
+            return targets
+        prob_sum = sum(target_prob_dict.values())
         rand_num = random.random()
         cumsum = 0.0
         for k in target_list_copy:
